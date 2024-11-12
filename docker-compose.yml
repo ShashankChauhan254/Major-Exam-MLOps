@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  ml_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow_server:5000
+    depends_on:
+      - mlflow_server
+    volumes:
+      - ./data:/app/data  # Map data directory for storing datasets
+      - ./artifacts:/app/artifacts  # Map artifacts directory for model artifacts
+    ports:
+      - "5001:5001"  # Expose an application port if necessary
+
+  mlflow_server:
+    image: mlflow:latest
+    environment:
+      - MLFLOW_TRACKING_URI=http://0.0.0.0:5000
+    volumes:
+      - ./mlruns:/mlflow/mlruns  # Persistent storage for MLflow experiments
+      - ./artifacts:/app/artifacts  # Map artifacts directory for MLflow models
+    ports:
+      - "5000:5000"  # MLflow tracking server port
