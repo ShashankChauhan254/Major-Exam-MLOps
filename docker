@@ -1,0 +1,31 @@
+# Dockerfile for ML Application with MLflow
+
+# Use a lightweight base image for Python ML applications
+FROM python:3.8-slim
+
+# Set working directory in the container
+WORKDIR /app
+
+# Copy the local requirements file to the container
+COPY requirements.txt .
+
+# Install Python dependencies with no cache to keep the image light
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install any OS dependencies for security or additional functionality (optional)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up environment variables for security (e.g., prevent running as root)
+ENV PYTHONUNBUFFERED=1
+ENV RUN_AS_USER=1000
+
+# Add MLflow configuration (assumes MLflow is included in requirements.txt)
+ENV MLFLOW_TRACKING_URI=http://mlflow_server:5000
+
+# Copy the entire project codebase into the container
+COPY . .
+
+# Set the entrypoint to the main application file
+CMD ["python", "app.py"]  # Replace 'app.py' with the main application file
